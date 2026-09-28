@@ -8,6 +8,7 @@ Edit freely: the more detail and personality you add, the better the answers.
 
 ## Basics
 - Name: Belle Yong
+- Pronouns: she/her
 - Location: Auckland, New Zealand
 - Headline: Computer Science graduate | Data, Insights & Stakeholder Engagement
 - Looking for: a graduate role in business analysis, data & insights, digital marketing or customer engagement, somewhere Belle can contribute quickly, keep learning, and build a career that blends people, data and technology.
