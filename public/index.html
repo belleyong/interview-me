@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interview Belle Yong</title>
+  <meta name="description" content="Ask an AI assistant about Belle Yong's experience, projects and skills." />
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6b6b70;
+      --border: #e3e3e0;
+      --accent: #2f5cf4;
+      --accent-text: #ffffff;
+      --bot-bubble: #f0f0ee;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141416;
+        --surface: #1c1c1f;
+        --text: #ececef;
+        --muted: #9a9aa2;
+        --border: #2c2c31;
+        --accent: #6f8dff;
+        --accent-text: #0b0b0d;
+        --bot-bubble: #26262b;
+      }
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 16px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    header h1 { margin: 0 0 4px; font-size: 1.75rem; letter-spacing: -0.01em; }
+    header p { margin: 0; color: var(--muted); }
+    .note { font-size: 0.85rem; color: var(--muted); }
+    .chat {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      min-height: 320px;
+    }
+    .msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; }
+    .msg.bot { background: var(--bot-bubble); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg.user { background: var(--accent); color: var(--accent-text); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg.thinking { color: var(--muted); font-style: italic; }
+    .suggestions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .suggestions button {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .suggestions button:hover { border-color: var(--accent); color: var(--accent); }
+    form { display: flex; gap: 8px; }
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+    }
+    input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    button[type="submit"] {
+      padding: 0 18px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+    footer { font-size: 0.85rem; color: var(--muted); }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Interview Belle Yong</h1>
+      <p>Computer Science graduate, University of Auckland · Data, insights &amp; stakeholder engagement</p>
+    </header>
+
+    <p class="note">You're chatting with an AI assistant, not Belle. It only answers from Belle's CV and notes, and will say so when it doesn't know.</p>
+
+    <section class="chat" id="chat" aria-live="polite">
+      <div class="msg bot">Kia ora! I'm Belle's AI assistant. What would you like to know?</div>
+    </section>
+
+    <div class="suggestions" id="suggestions">
+      <button type="button">Tell me about Belle</button>
+      <button type="button">What are Belle's strongest skills?</button>
+      <button type="button">What project is Belle most proud of?</button>
+      <button type="button">What kind of role is Belle looking for?</button>
+    </div>
+
+    <form id="form">
+      <input id="input" type="text" placeholder="Ask a question…" autocomplete="off" maxlength="1000" aria-label="Your question" required />
+      <button type="submit" id="send">Send</button>
+    </form>
+
+    <footer>
+      Built by Belle with the Gemini API · <a href="https://github.com/belleyong/interview-me">Source on GitHub</a>
+    </footer>
+  </main>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+    const suggestions = document.getElementById("suggestions");
+    const history = [];
+
+    function addMessage(role, text, extraClass = "") {
+      const el = document.createElement("div");
+      el.className = `msg ${role === "user" ? "user" : "bot"} ${extraClass}`.trim();
+      el.textContent = text;
+      chat.appendChild(el);
+      chat.scrollTop = chat.scrollHeight;
+      return el;
+    }
+
+    async function ask(question) {
+      question = question.trim();
+      if (!question) return;
+      suggestions.hidden = true;
+      addMessage("user", question);
+      history.push({ role: "user", content: question });
+      input.value = "";
+      input.disabled = send.disabled = true;
+      const pending = addMessage("bot", "Thinking…", "thinking");
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Request failed");
+        pending.textContent = data.reply;
+        pending.classList.remove("thinking");
+        history.push({ role: "assistant", content: data.reply });
+      } catch (err) {
+        pending.textContent = err.message || "Something went wrong. Please try again.";
+        history.pop(); // drop the unanswered question so the conversation stays valid
+      } finally {
+        input.disabled = send.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      ask(input.value);
+    });
+    suggestions.addEventListener("click", (e) => {
+      if (e.target.tagName === "BUTTON") ask(e.target.textContent);
+    });
+  </script>
+</body>
+</html>
