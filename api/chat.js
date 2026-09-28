@@ -48,6 +48,18 @@ function cleanMessages(raw) {
   return messages;
 }
 
+// The free tier sometimes returns 503 ("high demand"); these usually clear within seconds.
+async function generateWithRetry(request, attempts = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      return await ai.models.generateContent(request);
+    } catch (err) {
+      if (!(err instanceof ApiError && err.status === 503) || i >= attempts) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 1000 * i));
+    }
+  }
+}
+
 function send(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
@@ -66,7 +78,7 @@ export default async function handler(req, res) {
   if (!messages) return send(res, 400, { error: "Invalid messages" });
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: MODEL,
       // Gemini calls the assistant role "model".
       contents: messages.map((m) => ({
@@ -83,7 +95,7 @@ export default async function handler(req, res) {
     const reply = response.text?.trim() || FALLBACK_REPLY;
     return send(res, 200, { reply });
   } catch (err) {
-    if (err instanceof ApiError && err.status === 429) {
+    if (err instanceof ApiError && (err.status === 429 || err.status === 503)) {
       return send(res, 429, { error: "Lots of visitors right now. Please try again in a minute." });
     }
     console.error(err);
