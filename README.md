@@ -2,7 +2,7 @@
 
 An AI chatbot that recruiters can ask about me. It answers from my CV, and says so when it doesn't know instead of making things up.
 
-**Live demo:** https://interview-me-sandy.vercel.app
+**Live demo:** https://interview-belle.vercel.app
 
 ## How it works
 
