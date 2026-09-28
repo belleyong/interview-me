@@ -95,10 +95,10 @@ export default async function handler(req, res) {
     const reply = response.text?.trim() || FALLBACK_REPLY;
     return send(res, 200, { reply });
   } catch (err) {
+    console.error(err); // visible in Vercel → Project → Logs
     if (err instanceof ApiError && (err.status === 429 || err.status === 503)) {
       return send(res, 429, { error: "Lots of visitors right now. Please try again in a minute." });
     }
-    console.error(err);
     return send(res, 500, { error: "Something went wrong. Please try again." });
   }
 }
