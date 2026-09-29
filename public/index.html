@@ -5,164 +5,386 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Interview Belle Yong</title>
   <meta name="description" content="Ask an AI assistant about Belle Yong's experience, projects and skills." />
+  <meta name="theme-color" content="#1e1e1e" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f7f7f5;
-      --surface: #ffffff;
-      --text: #1d1d1f;
-      --muted: #6b6b70;
-      --border: #e3e3e0;
-      --accent: #745172;
-      --accent-text: #ffffff;
-      --bot-bubble: #f0f0ee;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #141416;
-        --surface: #1c1c1f;
-        --text: #ececef;
-        --muted: #9a9aa2;
-        --border: #2c2c31;
-        --accent: #c9a0c3;
-        --accent-text: #0b0b0d;
-        --bot-bubble: #26262b;
-      }
+      color-scheme: dark;
+      --titlebar: #323233;
+      --activity: #2c2c2c;
+      --sidebar: #252526;
+      --editor: #1e1e1e;
+      --panel: #181818;
+      --border: #2b2b2b;
+      --text: #d4d4d4;
+      --muted: #858585;
+      --faint: #5a5a5a;
+      --accent: #745172;       /* buttons, status bar, selection */
+      --accent-hover: #86617f;
+      --accent-soft: #c9a0c3;  /* accent text on dark backgrounds */
+      --green: #6a9955;
+      --orange: #ce9178;
+      --blue: #9cdcfe;
+      --user-bg: #2a2a2d;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
+    html, body { height: 100%; }
     body {
       margin: 0;
-      background: var(--bg);
+      background: var(--editor);
       color: var(--text);
-      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font: 13.5px/1.6 var(--mono);
+      overflow: hidden;
     }
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 32px 16px;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    ::selection { background: var(--accent); color: #fff; }
+    button { font: inherit; }
+
+    .window { height: 100dvh; display: grid; grid-template-rows: 34px 1fr 24px; }
+
+    /* Title bar */
+    .titlebar {
+      background: var(--titlebar);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 12px;
+      color: var(--muted); font-size: 12px;
     }
-    header h1 { margin: 0 0 4px; font-size: 1.75rem; letter-spacing: -0.01em; }
-    header p { margin: 0; color: var(--muted); }
-    .note { font-size: 0.85rem; color: var(--muted); }
-    .chat {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      min-height: 320px;
+    .lights { display: flex; gap: 8px; }
+    .lights span { width: 12px; height: 12px; border-radius: 50%; }
+    .lights span:nth-child(1) { background: #ff5f57; }
+    .lights span:nth-child(2) { background: #febc2e; }
+    .lights span:nth-child(3) { background: #28c840; }
+    .titlebar .title { flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .titlebar img { width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px; }
+    .titlebar .spacer { width: 52px; }
+
+    /* Workbench */
+    .workbench { display: grid; grid-template-columns: 48px 240px 1fr; min-height: 0; }
+    .activity {
+      background: var(--activity);
+      display: flex; flex-direction: column; align-items: center; gap: 18px; padding-top: 12px;
+      color: var(--muted);
     }
-    .msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; }
-    .msg.bot { background: var(--bot-bubble); align-self: flex-start; border-bottom-left-radius: 4px; }
-    .msg.user { background: var(--accent); color: var(--accent-text); align-self: flex-end; border-bottom-right-radius: 4px; }
-    .msg.thinking { color: var(--muted); font-style: italic; }
-    .suggestions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .suggestions button {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font: inherit;
-      font-size: 0.9rem;
-      cursor: pointer;
+    .activity svg { width: 24px; height: 24px; }
+    .activity .on { color: var(--text); box-shadow: -12px 0 0 -10px var(--accent-soft); }
+
+    .sidebar { background: var(--sidebar); border-right: 1px solid var(--border); overflow-y: auto; }
+    .sidebar h2 { margin: 0; padding: 10px 16px; font-size: 11px; font-weight: 400; letter-spacing: .08em; color: var(--muted); }
+    .tree { list-style: none; margin: 0; padding: 0 0 12px; }
+    .tree .folder { padding: 2px 16px; color: var(--text); font-weight: 600; font-size: 12.5px; }
+    .tree button {
+      width: 100%; text-align: left; background: none; border: 0; color: var(--text);
+      padding: 2px 16px 2px 32px; font-size: 12.5px; cursor: pointer;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .suggestions button:hover { border-color: var(--accent); color: var(--accent); }
-    form { display: flex; gap: 8px; }
+    .tree button.root { padding-left: 16px; }
+    .tree button::before { content: "M↓"; color: var(--blue); font-size: 10px; margin-right: 8px; }
+    .tree button:hover { background: #2a2d2e; }
+    .tree button:focus-visible { outline: 1px solid var(--accent-soft); outline-offset: -1px; }
+
+    /* Editor + terminal */
+    .main { display: grid; grid-template-rows: 35px minmax(0, 38%) 1fr; min-width: 0; min-height: 0; }
+    .tabs { background: var(--sidebar); display: flex; border-bottom: 1px solid var(--border); }
+    .tab {
+      display: flex; align-items: center; gap: 8px; padding: 0 16px;
+      background: var(--editor); border-top: 1px solid var(--accent-soft);
+      font-size: 12.5px;
+    }
+    .tab::before { content: "M↓"; color: var(--blue); font-size: 10px; }
+    .editor { background: var(--editor); overflow: auto; padding: 10px 0; }
+    .code { margin: 0; counter-reset: ln; }
+    .code div { display: flex; min-height: 1.6em; padding-right: 16px; }
+    .code div::before {
+      counter-increment: ln; content: counter(ln);
+      width: 52px; flex: none; text-align: right; padding-right: 20px; color: var(--faint);
+    }
+    .code .h { color: var(--accent-soft); font-weight: 600; }
+    .code .q { color: var(--green); }
+    .code .li { color: var(--orange); }
+
+    .panel { background: var(--panel); border-top: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+    .panel-tabs { display: flex; gap: 20px; padding: 0 16px; font-size: 11px; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .panel-tabs span { padding: 8px 0 6px; }
+    .panel-tabs .on { color: var(--text); border-bottom: 1px solid var(--accent-soft); }
+
+    .term { flex: 1; overflow-y: auto; padding: 14px 16px 8px; }
+    .welcome {
+      border: 1px solid var(--accent); border-radius: 6px;
+      padding: 10px 14px; margin-bottom: 14px; max-width: 640px;
+    }
+    .welcome b { color: var(--accent-soft); }
+    .welcome p { margin: 0; }
+    .welcome .dim { color: var(--muted); }
+
+    .line { margin: 0 0 12px; white-space: pre-wrap; word-wrap: break-word; }
+    .line.user { background: var(--user-bg); padding: 4px 10px; border-radius: 4px; color: var(--text); }
+    .line.user::before { content: "> "; color: var(--muted); }
+    .line.bot { display: flex; gap: 10px; }
+    .line.bot::before { content: "●"; color: var(--accent-soft); flex: none; }
+    .line.bot.err::before { color: #f48771; }
+    .line.bot .body { flex: 1; min-width: 0; }
+    .line.bot strong { color: #fff; }
+    .line.bot ul { margin: 4px 0; padding-left: 18px; }
+    .line.sys { color: var(--muted); }
+    .spin { color: var(--accent-soft); }
+    .spin .hint { color: var(--muted); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+    .chips button, .send {
+      background: var(--accent); color: #fff; border: 0; border-radius: 4px;
+      padding: 5px 12px; font-size: 12.5px; cursor: pointer;
+    }
+    .chips button:hover, .send:hover { background: var(--accent-hover); }
+    .chips button:focus-visible, .send:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+
+    form {
+      margin: 0 16px 12px; display: flex; align-items: center; gap: 10px;
+      border: 1px solid var(--faint); border-radius: 6px; padding: 6px 6px 6px 12px;
+    }
+    form:focus-within { border-color: var(--accent-soft); }
+    form .prompt { color: var(--accent-soft); }
     input {
-      flex: 1;
-      min-width: 0;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text);
-      font: inherit;
+      flex: 1; min-width: 0; background: none; border: 0; outline: 0;
+      color: var(--text); font: inherit;
     }
-    input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-    button[type="submit"] {
-      padding: 0 18px;
-      border: 0;
-      border-radius: 12px;
-      background: var(--accent);
-      color: var(--accent-text);
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
+    input::placeholder { color: var(--faint); }
+    button:disabled { opacity: .5; cursor: default; }
+    .foot { margin: -6px 16px 10px; font-size: 11.5px; color: var(--faint); }
+    .foot a { color: var(--muted); }
+
+    /* Status bar */
+    .status {
+      background: var(--accent); color: #fff; font-size: 11.5px;
+      display: flex; align-items: center; gap: 16px; padding: 0 12px; white-space: nowrap; overflow: hidden;
     }
-    button:disabled { opacity: 0.5; cursor: default; }
-    footer { font-size: 0.85rem; color: var(--muted); }
-    footer a { color: var(--accent); }
+    .status .right { margin-left: auto; display: flex; gap: 16px; }
+    .status a { color: #fff; text-decoration: none; }
+
+    @media (max-width: 900px) {
+      .workbench { grid-template-columns: 1fr; }
+      .activity, .sidebar { display: none; }
+    }
+    @media (max-width: 640px) {
+      body { font-size: 13px; }
+      .main { grid-template-rows: minmax(0, 1fr); }
+      .tabs, .editor { display: none; }
+      .titlebar .spacer, .status .hide-sm { display: none; }
+      .term { padding: 12px; }
+      form { margin: 0 12px 10px; }
+      .foot { margin: -4px 12px 8px; }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <h1>Interview Belle Yong</h1>
-      <p>Computer Science graduate, University of Auckland · Data, insights &amp; stakeholder engagement</p>
+  <div class="window">
+    <header class="titlebar">
+      <div class="lights" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="title"><img src="/favicon-32.png" alt="" />interview-belle — Belle Yong</div>
+      <div class="spacer"></div>
     </header>
 
-    <p class="note">You're chatting with an AI assistant, not Belle. It only answers from Belle's CV and notes, and will say so when it doesn't know.</p>
+    <div class="workbench">
+      <nav class="activity" aria-hidden="true">
+        <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10c0 4-6 3-11 7"/></svg>
+      </nav>
 
-    <section class="chat" id="chat" aria-live="polite">
-      <div class="msg bot">Kia ora! I'm Belle's AI assistant. What would you like to know?</div>
-    </section>
+      <aside class="sidebar" aria-label="Explorer: click a file to ask about it">
+        <h2>EXPLORER</h2>
+        <ul class="tree" id="tree">
+          <li class="folder">⌄ INTERVIEW-BELLE</li>
+          <li><button class="root" data-q="Tell me about Belle">README.md</button></li>
+          <li class="folder">&nbsp;&nbsp;⌄ experience</li>
+          <li><button data-q="What does Belle do at the University of Auckland?">uoa-advisor.md</button></li>
+          <li><button data-q="What did Belle do at DairyNZ?">dairynz-intern.md</button></li>
+          <li><button data-q="What leadership experience does Belle have?">leadership.md</button></li>
+          <li class="folder">&nbsp;&nbsp;⌄ projects</li>
+          <li><button data-q="What project is Belle most proud of?">capstone.md</button></li>
+          <li><button data-q="Tell me about Belle's personal projects">side-projects.md</button></li>
+          <li><button class="root" data-q="What are Belle's strongest skills?">skills.md</button></li>
+          <li><button class="root" data-q="What kind of role is Belle looking for?">looking-for.md</button></li>
+          <li><button class="root" data-q="How can I contact Belle?">contact.md</button></li>
+        </ul>
+      </aside>
 
-    <div class="suggestions" id="suggestions">
-      <button type="button">Tell me about Belle</button>
-      <button type="button">What are Belle's strongest skills?</button>
-      <button type="button">What project is Belle most proud of?</button>
-      <button type="button">What kind of role is Belle looking for?</button>
+      <main class="main">
+        <div class="tabs"><div class="tab">README.md</div></div>
+        <section class="editor" aria-label="About this site">
+          <div class="code">
+            <div><span class="h"># Belle Yong</span></div>
+            <div></div>
+            <div><span class="q">&gt; Computer Science graduate · University of Auckland</span></div>
+            <div><span class="q">&gt; Data analysis &amp; operations · Stakeholder &amp; event leadership</span></div>
+            <div></div>
+            <div><span class="h">## About this site</span></div>
+            <div>You're chatting with an AI assistant, not Belle.</div>
+            <div>It only answers from Belle's CV, and says so when it doesn't know.</div>
+            <div></div>
+            <div><span class="h">## Try it</span></div>
+            <div><span class="li">-</span>&nbsp;Click a file in the explorer, or</div>
+            <div><span class="li">-</span>&nbsp;Type a question in the terminal below</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-tabs" aria-hidden="true"><span>PROBLEMS</span><span>OUTPUT</span><span class="on">TERMINAL</span></div>
+          <div class="term" id="term" aria-live="polite">
+            <div class="welcome">
+              <p><b>✻ Welcome to interview-belle</b></p>
+              <p class="dim">&nbsp;&nbsp;An AI assistant that answers from Belle's CV.</p>
+              <p class="dim">&nbsp;&nbsp;/help for ideas · /clear to start over</p>
+            </div>
+            <p class="line bot"><span class="body">Kia ora! I'm Belle's AI assistant. What would you like to know?</span></p>
+            <div class="chips" id="chips">
+              <button type="button">Tell me about Belle</button>
+              <button type="button">What are Belle's strongest skills?</button>
+              <button type="button">What project is Belle most proud of?</button>
+              <button type="button">What kind of role is Belle looking for?</button>
+            </div>
+          </div>
+          <form id="form">
+            <span class="prompt" aria-hidden="true">&gt;</span>
+            <input id="input" type="text" placeholder="Ask a question about Belle…" autocomplete="off" maxlength="1000" aria-label="Your question" required />
+            <button type="submit" class="send" id="send">Send ↵</button>
+          </form>
+          <p class="foot">Built by Belle with the Gemini API · <a href="https://github.com/belleyong/interview-me">source on GitHub</a></p>
+        </section>
+      </main>
     </div>
 
-    <form id="form">
-      <input id="input" type="text" placeholder="Ask a question…" autocomplete="off" maxlength="1000" aria-label="Your question" required />
-      <button type="submit" id="send">Send</button>
-    </form>
-
-    <footer>
-      Built by Belle with the Gemini API · <a href="https://github.com/belleyong/interview-me">Source on GitHub</a>
+    <footer class="status">
+      <span>⎇ main</span>
+      <span class="hide-sm">✓ 0 problems</span>
+      <span class="right">
+        <span class="hide-sm">Gemini</span>
+        <span class="hide-sm">UTF-8</span>
+        <a href="https://linkedin.com/in/belleyom" target="_blank" rel="noopener">in/belleyom</a>
+      </span>
     </footer>
-  </main>
+  </div>
 
   <script>
-    const chat = document.getElementById("chat");
+    const term = document.getElementById("term");
     const form = document.getElementById("form");
     const input = document.getElementById("input");
     const send = document.getElementById("send");
-    const suggestions = document.getElementById("suggestions");
+    const chips = document.getElementById("chips");
+    const tree = document.getElementById("tree");
     const history = [];
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const SPIN = ["·", "✢", "✳", "✶", "✻", "✽", "✻", "✶", "✳", "✢"];
+    const VERBS = ["Thinking", "Recalling", "Reading the CV", "Pondering", "Gathering notes"];
+    let busy = false;
 
-    function addMessage(role, text, extraClass = "") {
-      const el = document.createElement("div");
-      el.className = `msg ${role === "user" ? "user" : "bot"} ${extraClass}`.trim();
-      el.textContent = text;
-      chat.appendChild(el);
-      chat.scrollTop = chat.scrollHeight;
+    const scroll = () => { term.scrollTop = term.scrollHeight; };
+
+    function line(cls, text) {
+      const el = document.createElement("p");
+      el.className = `line ${cls}`;
+      if (cls.startsWith("bot")) {
+        const body = document.createElement("span");
+        body.className = "body";
+        body.textContent = text;
+        el.appendChild(body);
+      } else {
+        el.textContent = text;
+      }
+      term.appendChild(el);
+      scroll();
       return el;
+    }
+
+    // Light formatting for replies: **bold** and "- " bullet lists. Input is escaped first.
+    function format(text) {
+      const esc = text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const bold = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const out = [];
+      let list = [];
+      for (const raw of esc.split("\n")) {
+        const m = raw.match(/^\s*[-*•]\s+(.*)/);
+        if (m) { list.push(`<li>${bold(m[1])}</li>`); continue; }
+        if (list.length) { out.push(`<ul>${list.join("")}</ul>`); list = []; }
+        out.push(bold(raw));
+      }
+      if (list.length) out.push(`<ul>${list.join("")}</ul>`);
+      return out.join("\n").replace(/\n(<ul>)/g, "$1").replace(/(<\/ul>)\n/g, "$1");
+    }
+
+    // Type the reply out like a terminal, then swap in the formatted version.
+    function typeOut(el, text) {
+      const body = el.querySelector(".body");
+      if (reduceMotion) { body.innerHTML = format(text); scroll(); return Promise.resolve(); }
+      return new Promise((resolve) => {
+        let i = 0;
+        const step = Math.max(2, Math.ceil(text.length / 180));
+        const tick = () => {
+          i += step;
+          body.textContent = text.slice(0, i);
+          scroll();
+          if (i < text.length) setTimeout(tick, 12);
+          else { body.innerHTML = format(text); scroll(); resolve(); }
+        };
+        tick();
+      });
+    }
+
+    function spinner() {
+      const el = document.createElement("p");
+      el.className = "line spin";
+      term.appendChild(el);
+      const verb = VERBS[Math.floor(Math.random() * VERBS.length)];
+      const start = Date.now();
+      let f = 0;
+      const draw = () => {
+        const s = Math.floor((Date.now() - start) / 1000);
+        el.innerHTML = `${SPIN[f++ % SPIN.length]} ${verb}… <span class="hint">(${s}s)</span>`;
+      };
+      draw();
+      const id = setInterval(draw, 120);
+      scroll();
+      return () => { clearInterval(id); el.remove(); };
+    }
+
+    function command(cmd) {
+      if (cmd === "/clear") {
+        history.length = 0;
+        term.querySelectorAll(".line").forEach((el) => el.remove());
+        line("bot", "Cleared. What would you like to know?");
+        chips.hidden = false;
+        term.appendChild(chips);
+        return true;
+      }
+      if (cmd === "/help") {
+        line("user", cmd);
+        line("sys", "Try asking about Belle's experience, projects, skills or the kind of role she's after. You can also click a file in the explorer.");
+        chips.hidden = false;
+        term.appendChild(chips);
+        scroll();
+        return true;
+      }
+      return false;
     }
 
     async function ask(question) {
       question = question.trim();
-      if (!question) return;
-      suggestions.hidden = true;
-      addMessage("user", question);
-      history.push({ role: "user", content: question });
+      if (!question || busy) return;
       input.value = "";
+      if (question.startsWith("/") && command(question.toLowerCase())) return;
+      busy = true;
+      chips.hidden = true;
+      line("user", question);
+      history.push({ role: "user", content: question });
       input.disabled = send.disabled = true;
-      const pending = addMessage("bot", "Thinking…", "thinking");
+      const stop = spinner();
 
       try {
         const res = await fetch("/api/chat", {
@@ -172,13 +394,15 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Request failed");
-        pending.textContent = data.reply;
-        pending.classList.remove("thinking");
+        stop();
         history.push({ role: "assistant", content: data.reply });
+        await typeOut(line("bot", ""), data.reply);
       } catch (err) {
-        pending.textContent = err.message || "Something went wrong. Please try again.";
+        stop();
+        line("bot err", err.message || "Something went wrong. Please try again.");
         history.pop(); // drop the unanswered question so the conversation stays valid
       } finally {
+        busy = false;
         input.disabled = send.disabled = false;
         input.focus();
       }
@@ -188,8 +412,12 @@
       e.preventDefault();
       ask(input.value);
     });
-    suggestions.addEventListener("click", (e) => {
+    chips.addEventListener("click", (e) => {
       if (e.target.tagName === "BUTTON") ask(e.target.textContent);
+    });
+    tree.addEventListener("click", (e) => {
+      const q = e.target.dataset && e.target.dataset.q;
+      if (q) ask(q);
     });
   </script>
 </body>
