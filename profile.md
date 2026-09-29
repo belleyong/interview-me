@@ -47,7 +47,7 @@ Computer Science graduate from the University of Auckland who turns data and ins
 ## Projects
 - **Nesian Narratives Toolkit (capstone, 2026)**: Led a six-person Agile team building an interactive learning platform that makes cultural education more accessible. Nominated for the Community Impact Award. Belle ran requirements gathering, sprint planning and stakeholder feedback cycles, and contributed to the full-stack MERN build (React, Node.js, MongoDB, REST APIs). The project received an A+.
 - **Younite, WDCC (2024)**: Contributed to a client-facing web platform (Next.js, Strapi, PostgreSQL), working with stakeholders to turn requirements into an accessible, user-focused experience.
-- **Interview Me (2026, this website)**: An AI chatbot recruiters can ask about Belle, built with the Gemini API (free tier). It answers only from Belle's profile and says so when it doesn't know.
+- **Belley (2026, this website)**: An AI chatbot recruiters can ask about Belle, built with the Gemini API (free tier). It answers only from Belle's profile and says so when it doesn't know.
 
 ## Certifications
 - Deloitte Australia Data Analytics Job Simulation (Forage, 2026): built a Tableau dashboard and used Excel to classify data and draw business conclusions.

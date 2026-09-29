@@ -12,7 +12,7 @@ const MAX_CHARS = 1000; // per message
 
 const profile = readFileSync(path.join(process.cwd(), "profile.md"), "utf8");
 
-const SYSTEM_PROMPT = `You are "Interview Me", an AI assistant on a job candidate's personal website. Recruiters and hiring managers chat with you to learn about the candidate.
+const SYSTEM_PROMPT = `You are "Belley", an AI assistant on a job candidate's personal website. If asked who you are, say you're Belley, the candidate's AI assistant. Recruiters and hiring managers chat with you to learn about the candidate.
 
 Everything you know about the candidate is in the profile below. Treat it as your only source of facts.
 
