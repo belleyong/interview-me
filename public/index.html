@@ -6,10 +6,12 @@
   <title>Belley · Belle Yong's AI assistant</title>
   <meta name="description" content="Ask Belley, an AI assistant, about Belle Yong's experience, projects and skills." />
   <meta name="theme-color" content="#1e1e1e" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <!-- ?v= forces browsers to refetch icons they cached before the orchid existed -->
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2" media="(prefers-color-scheme: light)" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-dark.png?v=2" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=2" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -39,15 +41,29 @@
     html, body { height: 100%; }
     body {
       margin: 0;
-      background: var(--editor);
+      background: #000;
       color: var(--text);
-      font: 13.5px/1.6 var(--mono);
-      overflow: hidden;
+      font: 13px/1.6 var(--mono);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      min-height: 100dvh;
+      padding: 24px;
     }
     ::selection { background: var(--accent); color: #fff; }
     button { font: inherit; }
 
-    .window { height: 100dvh; display: grid; grid-template-rows: 34px 1fr 24px; }
+    /* A floating IDE window in the middle of the page */
+    .window {
+      width: min(1000px, 100%);
+      height: min(640px, calc(100dvh - 90px));
+      min-height: 420px;
+      display: grid; grid-template-rows: 34px 1fr 24px;
+      background: var(--editor);
+      border: 1px solid #3a3a3a;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .03);
+    }
+    .copyright { margin: 0; font-size: 11.5px; color: var(--faint); }
 
     /* Title bar */
     .titlebar {
@@ -67,7 +83,7 @@
     .titlebar .spacer { width: 52px; }
 
     /* Workbench */
-    .workbench { display: grid; grid-template-columns: 48px 240px 1fr; min-height: 0; }
+    .workbench { display: grid; grid-template-columns: 44px 200px 1fr; min-height: 0; }
     .activity {
       background: var(--activity);
       display: flex; flex-direction: column; align-items: center; gap: 18px; padding-top: 12px;
@@ -79,10 +95,10 @@
     .sidebar { background: var(--sidebar); border-right: 1px solid var(--border); overflow-y: auto; }
     .sidebar h2 { margin: 0; padding: 10px 16px; font-size: 11px; font-weight: 400; letter-spacing: .08em; color: var(--muted); }
     .tree { list-style: none; margin: 0; padding: 0 0 12px; }
-    .tree .folder { padding: 2px 16px; color: var(--text); font-weight: 600; font-size: 12.5px; }
+    .tree .folder { padding: 2px 16px; color: var(--text); font-weight: 600; font-size: 12px; }
     .tree button {
       width: 100%; text-align: left; background: none; border: 0; color: var(--text);
-      padding: 2px 16px 2px 32px; font-size: 12.5px; cursor: pointer;
+      padding: 2px 16px 2px 32px; font-size: 12px; cursor: pointer;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .tree button.root { padding-left: 16px; }
@@ -96,7 +112,7 @@
     .tab {
       display: flex; align-items: center; gap: 8px; padding: 0 16px;
       background: var(--editor); border-top: 1px solid var(--accent-soft);
-      font-size: 12.5px;
+      font-size: 12px;
     }
     .tab::before { content: "M↓"; color: var(--blue); font-size: 10px; }
     .editor { background: var(--editor); overflow: auto; padding: 10px 0; }
@@ -104,7 +120,7 @@
     .code div { display: flex; min-height: 1.6em; padding-right: 16px; }
     .code div::before {
       counter-increment: ln; content: counter(ln);
-      width: 52px; flex: none; text-align: right; padding-right: 20px; color: var(--faint);
+      width: 40px; flex: none; text-align: right; padding-right: 16px; color: var(--faint);
     }
     .code .h { color: var(--accent-soft); font-weight: 600; }
     .code .q { color: var(--green); }
@@ -140,7 +156,7 @@
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
     .chips button, .send {
       background: var(--accent); color: #fff; border: 0; border-radius: 4px;
-      padding: 5px 12px; font-size: 12.5px; cursor: pointer;
+      padding: 5px 12px; font-size: 12px; cursor: pointer;
     }
     .chips button:hover, .send:hover { background: var(--accent-hover); }
     .chips button:focus-visible, .send:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
@@ -173,7 +189,9 @@
       .activity, .sidebar { display: none; }
     }
     @media (max-width: 640px) {
-      body { font-size: 13px; }
+      body { padding: 0; gap: 0; }
+      .window { width: 100%; height: 100dvh; min-height: 0; border: 0; border-radius: 0; }
+      .copyright { display: none; }
       .main { grid-template-rows: minmax(0, 1fr); }
       .tabs, .editor { display: none; }
       .titlebar .spacer, .status .hide-sm { display: none; }
@@ -271,6 +289,7 @@
       </span>
     </footer>
   </div>
+  <p class="copyright">© 2026 Belle Yong</p>
 
   <script>
     const term = document.getElementById("term");
