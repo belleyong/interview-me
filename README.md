@@ -13,7 +13,7 @@ Browser (public/index.html)
 Serverless function (api/chat.js)
    │  system prompt = rules + profile.md
    ▼
-Gemini API (gemini-flash-latest, free tier)
+Gemini API (gemini-flash-latest, falling back to older models when busy; free tier)
 ```
 
 - **`profile.md`** is the single source of truth about me. The model is told to answer only from it.

@@ -4,8 +4,9 @@ import { GoogleGenAI, ApiError } from "@google/genai";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-// Google's alias for the current Flash model, which is available on the free tier.
-const MODEL = "gemini-flash-latest";
+// Tried in order. The newest Flash model is often overloaded on the free tier,
+// so fall back to older, less busy models rather than failing.
+const MODELS = ["gemini-flash-latest", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
 const MAX_MESSAGES = 20; // keep only the most recent turns to bound cost
 const MAX_CHARS = 1000; // per message
 
@@ -48,16 +49,26 @@ function cleanMessages(raw) {
   return messages;
 }
 
-// The free tier sometimes returns 503 ("high demand"); these usually clear within seconds.
-async function generateWithRetry(request, attempts = 3) {
-  for (let i = 1; ; i++) {
-    try {
-      return await ai.models.generateContent(request);
-    } catch (err) {
-      if (!(err instanceof ApiError && err.status === 503) || i >= attempts) throw err;
-      await new Promise((resolve) => setTimeout(resolve, 1000 * i));
+// The free tier sometimes returns 503 ("high demand"), 429 (quota used up) or
+// 404 (model retired). Retry a 503 once, then move on to the next model.
+const FALLBACK_STATUSES = [404, 429, 503];
+
+async function generateWithRetry(request) {
+  let lastErr;
+  for (const model of MODELS) {
+    for (let i = 1; i <= 2; i++) {
+      try {
+        return await ai.models.generateContent({ ...request, model });
+      } catch (err) {
+        if (!(err instanceof ApiError && FALLBACK_STATUSES.includes(err.status))) throw err;
+        lastErr = err;
+        console.warn(`${model} returned ${err.status}; trying the next option.`);
+        if (err.status !== 503) break; // only overloads clear up within seconds
+        if (i < 2) await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     }
   }
+  throw lastErr;
 }
 
 function send(res, status, body) {
@@ -79,7 +90,6 @@ export default async function handler(req, res) {
 
   try {
     const response = await generateWithRetry({
-      model: MODEL,
       // Gemini calls the assistant role "model".
       contents: messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
